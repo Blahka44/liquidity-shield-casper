@@ -1,0 +1,12 @@
+{
+  "asset": "CSPR",
+  "risk_score": 100,
+  "status": "ACTIVE",
+  "price_change": "-18.50",
+  "threshold": 15,
+  "last_action": "Protection triggered",
+  "agent_status": "Protection triggered",
+  "last_update": "2026-07-07T08:45:00.659Z",
+  "last_tx_hash": "eb26b40cfbc5f87434536516b9e82b5ac9db6f9a19dceb218bdce76b1280443f",
+  "agent_version": "1.0.0-policy"
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "timestamp": "2026-07-06T11:55:31.568Z",
+    "tx_hash": "0ddadb71e096f2976428ab56c904f76a5e26237245421560b07e4aee4f3b611c",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "PROTECTION_TRIGGERED",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T12:08:27.244Z",
+    "tx_hash": "2db68d0ddce9df2318e482ff0aeb72925abdd0d351f6f0559eedd47e3f56bfba",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "PROTECTION_TRIGGERED",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T12:09:04.120Z",
+    "tx_hash": "bf672cc42e53cc7df79537f17c05ad83ad7bdf33c380aa5bc071c80e3c7725b3",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "PROTECTION_TRIGGERED",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T12:36:48.684Z",
+    "tx_hash": "5d7e60d5142551f442926387deec89a2656ef753ff41b566071b8aa830de0100",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "Protection triggered",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T14:39:26.464Z",
+    "tx_hash": "de5b6036992756cb6b77c4dbb1ec385988ff7cd5864f4755d232a36afe1e479f",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "Protection triggered",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T15:28:47.856Z",
+    "tx_hash": "455a820927e8c7aa37a15c91752c6a4c77ad2bdeea6eca2f9f7d3ce4609dc622",
+    "risk_score": 33,
+    "status": "STANDBY",
+    "last_action": "Monitoring",
+    "price_change_24h": "-5.00",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T18:21:40.396Z",
+    "tx_hash": "7643b8ee57ceba3700b58f7ebcae07fd31ccd74dc7c92524e6df9f8e44eddceb",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "Protection triggered",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-06T18:53:42.806Z",
+    "tx_hash": "47af0789c3904dc157f7743bec918a34b69eeaec6359993be3c7c3746dc39294",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "Protection triggered",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-07T08:18:29.863Z",
+    "tx_hash": "418b758fa2dc027f6e907467b34843aecc4f28b7d5556a7bd27d31f7711de113",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "Protection triggered",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  },
+  {
+    "timestamp": "2026-07-07T08:45:00.807Z",
+    "tx_hash": "eb26b40cfbc5f87434536516b9e82b5ac9db6f9a19dceb218bdce76b1280443f",
+    "risk_score": 100,
+    "status": "ACTIVE",
+    "last_action": "Protection triggered",
+    "price_change_24h": "-18.50",
+    "threshold": 15
+  }
+]

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquidity Shield | Autonomous Risk Monitoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: rgba(15, 15, 35, 0.6);
+            --bg-card: rgba(20, 20, 45, 0.4);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-glow: rgba(0, 212, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a8;
+            --text-muted: #5a6078;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #7b2ff7;
+            --accent-green: #00d4a0;
+            --accent-red: #ff4757;
+            --accent-orange: #f39c12;
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        .bg-mesh {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(123, 47, 247, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 30% at 50% 100%, rgba(0, 212, 160, 0.04) 0%, transparent 50%);
+            animation: meshPulse 8s ease-in-out infinite;
+        }
+        @keyframes meshPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 70%);
+        }
+        .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+        header { margin-bottom: 40px; position: relative; }
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 212, 160, 0.1);
+            border: 1px solid rgba(0, 212, 160, 0.2);
+            color: var(--accent-green);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 16px;
+        }
+        .badge-live::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff 0%, #a0a8c0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: var(--text-secondary); font-size: 1.05rem; font-weight: 400; max-width: 500px; }
+        .flow-section { margin-bottom: 32px; }
+        .flow-container {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px 28px;
+            backdrop-filter: blur(20px);
+        }
+        .flow-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            padding: 8px 0;
+        }
+        .flow-node .icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+        .flow-node.active .icon { background: rgba(0, 212, 255, 0.12); color: var(--accent-cyan); }
+        .flow-arrow { color: var(--text-muted); font-size: 0.9rem; padding: 0 12px; opacity: 0.5; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 0;
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .metric-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .metric-card:hover::before { opacity: 1; }
+        .metric-card.alert {
+            border-color: rgba(255, 71, 87, 0.2);
+            background: linear-gradient(180deg, rgba(255, 71, 87, 0.04) 0%, var(--bg-card) 100%);
+        }
+        .metric-card.alert::after {
+            content: '';
+            position: absolute;
+            top: 12px; right: 12px;
+            width: 8px; height: 8px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255, 71, 87, 0.5);
+            animation: alertPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes alertPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .metric-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+        .metric-value .unit { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-left: 4px; }
+        .metric-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .metric-value.risk-low { color: var(--accent-green); }
+        .metric-value.risk-med { color: var(--accent-orange); }
+        .metric-value.risk-high { color: var(--accent-red); }
+        .metric-value.status-active { color: var(--accent-red); }
+        .metric-value.status-standby { color: var(--accent-green); }
+        .status-pill { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; position: relative; flex-shrink: 0; }
+        .status-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; opacity: 0.3; }
+        .status-dot.red { background: var(--accent-red); box-shadow: 0 0 12px rgba(255, 71, 87, 0.4); }
+        .status-dot.red::after { background: var(--accent-red); animation: ripple 2s ease-out infinite; }
+        .status-dot.green { background: var(--accent-green); box-shadow: 0 0 12px rgba(0, 212, 160, 0.4); }
+        @keyframes ripple { 0% { transform: scale(1); opacity: 0.3; } 100% { transform: scale(2.5); opacity: 0; } }
+        .audit-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+        .audit-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .audit-header h2 { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .audit-count {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .audit-table { width: 100%; border-collapse: collapse; }
+        .audit-table th {
+            text-align: left;
+            padding: 14px 28px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+        }
+        .audit-table td { padding: 16px 28px; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        .audit-table tr { transition: background 0.2s; }
+        .audit-table tr:hover { background: rgba(255,255,255,0.02); }
+        .audit-table tr:last-child td { border-bottom: none; }
+        .tx-hash {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .tx-hash:hover { opacity: 0.7; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-active { background: rgba(255, 71, 87, 0.1); color: var(--accent-red); border: 1px solid rgba(255, 71, 87, 0.15); }
+        .badge-standby { background: rgba(0, 212, 160, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 212, 160, 0.15); }
+        .risk-badge { font-family: var(--font-mono); font-weight: 600; }
+        .loading { text-align: center; padding: 60px; color: var(--text-muted); }
+        .error { padding: 20px 28px; color: var(--accent-red); background: rgba(255, 71, 87, 0.05); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .audit-table th, .audit-table td { padding: 12px 16px; }
+            .flow-container { padding: 16px 20px; }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .metric-card { animation: fadeIn 0.5s ease-out forwards; }
+        .metric-card:nth-child(1) { animation-delay: 0.05s; }
+        .metric-card:nth-child(2) { animation-delay: 0.1s; }
+        .metric-card:nth-child(3) { animation-delay: 0.15s; }
+        .metric-card:nth-child(4) { animation-delay: 0.2s; }
+        .metric-card:nth-child(5) { animation-delay: 0.25s; }
+    </style>
+</head>
+<body>
+    <div class="bg-mesh"></div>
+    <div class="grid-overlay"></div>
+    <div class="container">
+        <header>
+            <div class="badge-live">Live on Casper Testnet</div>
+            <h1>Liquidity Shield</h1>
+            <p class="subtitle">Autonomous Risk Monitoring Agent for Casper DeFi</p>
+        </header>
+        <div class="flow-section">
+            <div class="flow-container">
+                <div class="flow-node active"><span class="icon">📡</span><span>CoinGecko</span></div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node active"><span class="icon">👁</span><span>Observer</span></div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node active"><span class="icon">🧠</span><span>Risk Analysis</span></div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node active"><span class="icon">⛓</span><span>Casper Tx</span></div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node active"><span class="icon">📊</span><span>Dashboard</span></div>
+            </div>
+        </div>
+        <div class="metrics-grid" id="metrics"><div class="loading">Loading vault state...</div></div>
+        <div class="audit-section">
+            <div class="audit-header">
+                <h2>📋 Audit Trail</h2>
+                <span class="audit-count" id="audit-count">0 events</span>
+            </div>
+            <div id="audit-content"><div class="loading">Loading audit log...</div></div>
+        </div>
+    </div>
+    <script>
+        async function loadJson(filename) {
+            const res = await fetch('./' + filename + '?t=' + Date.now());
+            return res.json();
+        }
+        function getRiskClass(score) {
+            const s = parseInt(score) || 0;
+            if (s < 40) return 'risk-low';
+            if (s < 70) return 'risk-med';
+            return 'risk-high';
+        }
+        function formatTime(iso) {
+            if (!iso) return 'N/A';
+            const d = new Date(iso);
+            return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        function getAgentDisplay(status, lastAction) {
+            if (status === 'ACTIVE') return 'Protection Active';
+            if (lastAction === 'Evaluating') return 'Evaluating';
+            return 'Monitoring';
+        }
+        function renderMetrics(state) {
+            const score = parseInt(state.risk_score) || 0;
+            const isActive = state.status === 'ACTIVE';
+            const riskClass = getRiskClass(score);
+            const statusClass = isActive ? 'status-active' : 'status-standby';
+            const isAlert = isActive;
+            const agentDisplay = getAgentDisplay(state.status, state.last_action);
+            const agentColorClass = isActive ? 'risk-high' : 'risk-low';
+            document.getElementById('metrics').innerHTML =
+                '<div class="metric-card">' +
+                    '<div class="metric-label"><span>💎</span> Monitored Asset</div>' +
+                    '<div class="metric-value">' + (state.asset || 'CSPR') + '</div>' +
+                    '<div class="metric-meta">Threshold: ' + (state.threshold || 15) + '% drawdown</div>' +
+                '</div>' +
+                '<div class="metric-card ' + (isAlert ? 'alert' : '') + '">' +
+                    '<div class="metric-label"><span>🎯</span> Risk Score</div>' +
+                    '<div class="metric-value ' + riskClass + '">' + score + '<span class="unit">/100</span></div>' +
+                    '<div class="metric-meta">Policy-based evaluation</div>' +
+                '</div>' +
+                '<div class="metric-card">' +
+                    '<div class="metric-label"><span>📉</span> 24h Price Change</div>' +
+                    '<div class="metric-value">' + (state.price_change || '0.00') + '<span class="unit">%</span></div>' +
+                    '<div class="metric-meta">From CoinGecko API</div>' +
+                '</div>' +
+                '<div class="metric-card ' + (isAlert ? 'alert' : '') + '">' +
+                    '<div class="metric-label"><span>🛡</span> Protection Status</div>' +
+                    '<div class="metric-value ' + statusClass + '">' +
+                        '<span class="status-pill">' +
+                            '<span class="status-dot ' + (isAlert ? 'red' : 'green') + '"></span>' +
+                            (isAlert ? 'ACTIVE' : 'STANDBY') +
+                        '</span>' +
+                    '</div>' +
+                    '<div class="metric-meta">' + formatTime(state.last_update) + '</div>' +
+                '</div>' +
+                '<div class="metric-card">' +
+                    '<div class="metric-label"><span>🤖</span> Agent Status</div>' +
+                    '<div class="metric-value ' + agentColorClass + '">' + agentDisplay + '</div>' +
+                    '<div class="metric-meta">Last action: ' + (state.last_action || 'Vault created') + '</div>' +
+                '</div>';
+        }
+        function renderAudit(logs) {
+            const count = logs ? logs.length : 0;
+            document.getElementById('audit-count').textContent = count + ' event' + (count !== 1 ? 's' : '');
+            if (!logs || logs.length === 0) {
+                document.getElementById('audit-content').innerHTML = '<div class="error">No audit records found. Run the agent to generate transactions.</div>';
+                return;
+            }
+            const rows = logs.slice().reverse().slice(0, 20).map(function(log) {
+                const isActive = log.status === 'ACTIVE';
+                const actionDisplay = log.last_action || 'Monitoring';
+                return '<tr>' +
+                    '<td>' + formatTime(log.timestamp) + '</td>' +
+                    '<td><span class="badge ' + (isActive ? 'badge-active' : 'badge-standby') + '">' +
+                        '<span class="status-dot ' + (isActive ? 'red' : 'green') + '" style="width:6px;height:6px;"></span>' +
+                        log.status +
+                    '</span></td>' +
+                    '<td>' + actionDisplay + '</td>' +
+                    '<td class="risk-badge ' + getRiskClass(log.risk_score) + '">' + log.risk_score + '/100</td>' +
+                    '<td>' + log.price_change_24h + '%</td>' +
+                    '<td><a class="tx-hash" href="https://testnet.cspr.live/deploy/' + log.tx_hash + '" target="_blank" rel="noopener">' +
+                        log.tx_hash.slice(0, 12) + '...' + log.tx_hash.slice(-8) +
+                    '</a></td>' +
+                '</tr>';
+            }).join('');
+            document.getElementById('audit-content').innerHTML =
+                '<div style="overflow-x: auto;">' +
+                    '<table class="audit-table">' +
+                        '<thead><tr><th>Time</th><th>Status</th><th>Action</th><th>Risk</th><th>Change</th><th>Transaction</th></tr></thead>' +
+                        '<tbody>' + rows + '</tbody>' +
+                    '</table>' +
+                '</div>';
+        }
+        async function init() {
+            try {
+                const [state, audit] = await Promise.all([
+                    loadJson('state.json').catch(function() { return {}; }),
+                    loadJson('audit_log.json').catch(function() { return []; })
+                ]);
+                renderMetrics(state);
+                renderAudit(audit);
+            } catch (e) {
+                document.getElementById('metrics').innerHTML = '<div class="error">Failed to load data: ' + e.message + '</div>';
+            }
+        }
+        init();
+        setInterval(init, 3000);
+    </script>
+</body>
+</html>
