@@ -41,3 +41,32 @@ python3 -m http.server 8000
 # Open http://localhost:8000/dashboard.html
 Contact
 abuchianah3@gmail.com
+
+## Testing
+
+### 1. Build the contract
+```bash
+make build-contract
+```
+
+### 2. Start the agent
+```bash
+node agent.js
+```
+
+### 3. Verify on Casper Testnet
+- Check your account on https://testnet.cspr.live
+- Look for new transactions every 5 minutes
+- Transaction type should show "WASM deploy"
+
+### 4. View the dashboard
+```bash
+python3 -m http.server 8000
+# Open http://localhost:8000/dashboard.html
+```
+
+### 5. Check audit log
+```bash
+cat audit_log.json
+```
+Each entry contains timestamp, transaction hash, risk score, and status.
