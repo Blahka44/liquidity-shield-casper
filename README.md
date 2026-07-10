@@ -70,3 +70,10 @@ python3 -m http.server 8000
 cat audit_log.json
 ```
 Each entry contains timestamp, transaction hash, risk score, and status.
+
+## Data Sources & Trust Model
+
+- **Price Oracle:** CoinGecko API (trusted third-party source)
+- **Action Attestation:** All agent decisions are recorded as permanent, verifiable transactions on Casper Testnet
+- **Guarantee Scope:** The blockchain guarantees the agent acted deterministically based on the feed. Feed accuracy depends on CoinGecko's data integrity.
+- **Verification:** Anyone can verify transactions independently at https://testnet.cspr.live using the account hash provided above.
