@@ -1,130 +1,85 @@
-const https = require('https');
-const fs = require('fs');
-const { execSync } = require('child_process');
+const OracleService = require('./src/oracle/OracleService');
+const RiskEngine = require('./src/risk/RiskEngine');
+const PolicyEngine = require('./src/policy/PolicyEngine');
+const AuditLogger = require('./src/audit/AuditLogger');
+const CasperExecutor = require('./src/utils/CasperExecutor');
+const StateManager = require('./src/utils/StateManager');
+const Logger = require('./src/utils/Logger');
 
-const CONFIG = {
-    coingeckoUrl: 'https://api.coingecko.com/api/v3/coins/casper-network?market_data=true',
-    contractDir: '/home/abuchi/hackathon-project/liquidity-shield-contract',
-    wasmPath: 'contract/target/wasm32-unknown-unknown/release/contract.wasm',
-    secretKeyPath: '../secret_key.pem',
-    threshold: 15,
-    asset: 'CSPR'
-};
-
-function calculatePolicy(priceChange) {
-    const abs = Math.abs(priceChange);
-    const score = Math.min(100, Math.round((abs / CONFIG.threshold) * 100));
-    
-    let action = 'Monitoring';
-    let status = 'STANDBY';
-    
-    if (abs >= CONFIG.threshold) {
-        action = 'Protection triggered';
-        status = 'ACTIVE';
-    } else if (abs >= CONFIG.threshold * 0.5) {
-        action = 'Evaluating';
-        status = 'STANDBY';
-    }
-    
-    return { score, status, action, rawChange: priceChange.toFixed(2) };
-}
-
-function deployToCasper(riskScore, status, priceChange, lastAction) {
-    const script = `#!/bin/bash
-cd ${CONFIG.contractDir}
-casper-client put-transaction session \
-  --node-address https://node.testnet.casper.network/rpc \
-  --chain-name casper-test \
-  --secret-key ${CONFIG.secretKeyPath} \
-  --payment-amount 5000000000 \
-  --standard-payment true \
-  --gas-price-tolerance 1 \
-  --wasm-path ${CONFIG.wasmPath} \
-  --session-arg "risk_score:u64='${riskScore}'" \
-  --session-arg "status:string='${status}'" \
-  --session-arg "price_change:string='${priceChange}'" \
-  --session-arg "asset:string='${CONFIG.asset}'" \
-  --session-arg "last_action:string='${lastAction}'"
-`;
-    
-    const scriptPath = '/tmp/deploy_liquidity_shield.sh';
-    fs.writeFileSync(scriptPath, script);
-    fs.chmodSync(scriptPath, '755');
-    
-    console.log('🚀 Policy Engine: Executing state transition on Casper...\n');
-    try {
-        const output = execSync(scriptPath, { encoding: 'utf8', timeout: 120000 });
-        const result = JSON.parse(output);
-        const txHash = result.result?.transaction_hash?.Version1;
-        console.log('✅ State transition confirmed:', txHash);
-        return txHash;
-    } catch (e) {
-        console.error('❌ Transition failed:', e.stderr || e.message);
-        return null;
-    }
-}
-
-function writeState(policy, txHash) {
-    const state = {
-        asset: CONFIG.asset,
-        risk_score: policy.score,
-        status: policy.status,
-        price_change: policy.rawChange,
-        threshold: CONFIG.threshold,
-        last_action: policy.action,
-        agent_status: policy.status === 'ACTIVE' ? 'Protection triggered' : 'Monitoring',
-        last_update: new Date().toISOString(),
-        last_tx_hash: txHash || 'pending',
-        agent_version: '1.0.0-policy'
-    };
-    fs.writeFileSync('state.json', JSON.stringify(state, null, 2));
-}
-
-function logAudit(policy, txHash) {
-    const logFile = 'audit_log.json';
-    let logs = [];
-    if (fs.existsSync(logFile)) logs = JSON.parse(fs.readFileSync(logFile));
-    
-    logs.push({
-        timestamp: new Date().toISOString(),
-        tx_hash: txHash,
-        risk_score: policy.score,
-        status: policy.status,
-        last_action: policy.action,
-        price_change_24h: policy.rawChange,
-        threshold: CONFIG.threshold
-    });
-    
-    fs.writeFileSync(logFile, JSON.stringify(logs, null, 2));
-}
-
-async function main() {
-    console.log('╔══════════════════════════════════════════════════╗');
-    console.log('║     LIQUIDITY SHIELD — POLICY AGENT v1.0         ║');
-    console.log('║   Autonomous Risk Operations for Casper Network  ║');
-    console.log('╚══════════════════════════════════════════════════╝\n');
-
-    console.log('📡 Market Observer: Fetching CSPR market data...');
-    const priceChange = -18.5;
-    console.log(`📊 24h Price Change: ${priceChange.toFixed(2)}%`);
-
-    console.log('\n🧠 Policy Engine: Evaluating risk...');
-    const policy = calculatePolicy(priceChange);
-    console.log(`🎯 Risk Score: ${policy.score}/100`);
-    console.log(`🛡️  Protection Status: ${policy.status}`);
-    console.log(`⚡ Last Action: ${policy.action}`);
-
-    const txHash = deployToCasper(policy.score, policy.status, policy.rawChange, policy.action);
-
-    if (txHash) {
-        writeState(policy, txHash);
-        logAudit(policy, txHash);
-        console.log(`\n🔗 Explorer: https://testnet.cspr.live/deploy/${txHash}`);
-        console.log('📝 State written to state.json');
-        console.log('📋 Audit trail updated\n');
+class LiquidityShieldAgent {
+    constructor() {
+        this.oracle = new OracleService();
+        this.riskEngine = new RiskEngine();
+        this.policyEngine = new PolicyEngine();
+        this.audit = new AuditLogger();
+        this.executor = new CasperExecutor();
+        this.stateManager = new StateManager();
     }
 
-    console.log('⏰ Policy Agent: Standby. Re-run to evaluate next cycle.');
+    async run() {
+        Logger.banner();
+
+        try {
+            // Step 1: Fetch market data
+            const marketData = await this.oracle.fetchMarketData();
+            Logger.oracle(marketData);
+            this.audit.logOracleFetch(marketData);
+
+            // Step 2: Calculate risk
+            const riskAssessment = this.riskEngine.calculateRisk(marketData);
+            Logger.risk(riskAssessment);
+            this.audit.logRiskAssessment(riskAssessment);
+
+            // Step 3: Generate policy
+            const policy = this.policyEngine.generatePolicy(riskAssessment, marketData);
+            Logger.policy(policy);
+            this.audit.logPolicyGenerated(policy);
+
+            // Step 4: Execute if needed
+            let txResult = { success: false };
+            
+            // Deploy on CRITICAL, WARNING, or significant state changes
+            const shouldDeploy = (
+                riskAssessment.state === 'CRITICAL' || 
+                riskAssessment.state === 'WARNING' ||
+                (riskAssessment.state === 'MONITORING' && riskAssessment.score >= 60)
+            );
+
+            if (shouldDeploy) {
+                console.log('🚀 Policy Engine: Executing state transition on Casper...');
+                txResult = this.executor.deployTransaction(policy);
+                Logger.transaction(txResult);
+
+                if (txResult.success) {
+                    this.audit.logTransaction(policy, txResult.hash);
+                } else {
+                    this.audit.logError('casper_executor', new Error(txResult.error), {
+                        riskScore: riskAssessment.score,
+                        state: riskAssessment.state
+                    });
+                }
+            } else {
+                console.log('🟢 System state stable. No deployment required.');
+                console.log();
+            }
+
+            // Step 5: Update state
+            const newState = this.stateManager.updateState(
+                riskAssessment, 
+                policy, 
+                txResult.success ? txResult.hash : null
+            );
+            Logger.state(newState);
+
+        } catch (err) {
+            Logger.error('agent', err);
+            this.audit.logError('agent', err);
+        }
+
+        Logger.cycleComplete();
+    }
 }
 
-main().catch(console.error);
+// Run the agent
+const agent = new LiquidityShieldAgent();
+agent.run();

@@ -6,7 +6,7 @@
   "threshold": 15,
   "last_action": "Protection triggered",
   "agent_status": "Protection triggered",
-  "last_update": "2026-07-07T08:45:00.659Z",
-  "last_tx_hash": "eb26b40cfbc5f87434536516b9e82b5ac9db6f9a19dceb218bdce76b1280443f",
+  "last_update": "2026-07-10T14:33:54.435Z",
+  "last_tx_hash": "974764407057b16d3dbed83e90d0e38ba0195e493101ba8342eb8eb3426a2c08",
   "agent_version": "1.0.0-policy"
 }
