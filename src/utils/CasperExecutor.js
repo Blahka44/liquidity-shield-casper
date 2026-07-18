@@ -27,33 +27,62 @@ casper-client put-transaction session \
 `;
 
         const scriptPath = '/tmp/deploy_liquidity_shield.sh';
+        const fs = require('fs');
         
         try {
-            require('fs').writeFileSync(scriptPath, script);
-            require('fs').chmodSync(scriptPath, '755');
+            fs.writeFileSync(scriptPath, script);
+            fs.chmodSync(scriptPath, '755');
             
-            const output = execSync(`bash ${scriptPath}`, { encoding: 'utf8', timeout: 120000 });
+            const output = execSync(`bash ${scriptPath} 2>&1`, { 
+                encoding: 'utf8', 
+                timeout: 120000 
+            });
             
-            // Extract transaction hash from output
-            const hashMatch = output.match(/transaction_hash["\s:]+([a-f0-9]{64})/i) || 
-                              output.match(/deploy_hash["\s:]+([a-f0-9]{64})/i);
+            // Parse JSON response
+            let hash = null;
+            try {
+                const json = JSON.parse(output);
+                // Handle nested format: transaction_hash.Version1
+                if (json.result?.transaction_hash) {
+                    const txHash = json.result.transaction_hash;
+                    if (typeof txHash === 'string') {
+                        hash = txHash;
+                    } else if (txHash.Version1) {
+                        hash = txHash.Version1;
+                    } else if (txHash.Deploy) {
+                        hash = txHash.Deploy;
+                    }
+                }
+                // Also check for deploy_hash
+                if (!hash && json.result?.deploy_hash) {
+                    hash = json.result.deploy_hash;
+                }
+            } catch (e) {
+                // Fallback: try regex patterns
+                const match = output.match(/([a-f0-9]{64})/i);
+                if (match) hash = match[1];
+            }
             
-            this.lastTxHash = hashMatch ? hashMatch[1] : null;
+            this.lastTxHash = hash;
             
-            if (!this.lastTxHash) {
-                throw new Error('Could not extract transaction hash from deployment output');
+            if (!hash) {
+                return {
+                    success: false,
+                    error: 'Could not extract transaction hash',
+                    output: output.substring(0, 2000)
+                };
             }
 
             return {
                 success: true,
-                hash: this.lastTxHash,
-                explorerUrl: `https://testnet.cspr.live/deploy/${this.lastTxHash}`
+                hash: hash,
+                explorerUrl: `https://testnet.cspr.live/deploy/${hash}`
             };
         } catch (err) {
             return {
                 success: false,
                 error: err.message,
-                output: err.stdout || ''
+                output: err.stdout || err.stderr || ''
             };
         }
     }
