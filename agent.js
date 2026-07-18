@@ -80,6 +80,11 @@ class LiquidityShieldAgent {
     }
 }
 
-// Run the agent
-const agent = new LiquidityShieldAgent();
-agent.run();
+// Export for testing, but also run if called directly
+module.exports = LiquidityShieldAgent;
+
+// Run the agent if this file is executed directly
+if (require.main === module) {
+    const agent = new LiquidityShieldAgent();
+    agent.run();
+}
