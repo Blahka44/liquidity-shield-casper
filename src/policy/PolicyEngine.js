@@ -1,4 +1,4 @@
-const { CONFIG } = require('../types');
+const crypto = require('crypto');
 
 class PolicyEngine {
     constructor() {
@@ -15,27 +15,28 @@ class PolicyEngine {
         if (state === 'CRITICAL') {
             action = 'Protection triggered';
             requiresApproval = false;
-            reason = `Critical risk detected: ${score}/100. Price change: ${rawChange}%. Immediate protection required.`;
+            reason = 'Critical risk detected: ' + score + '/100. Price change: ' + rawChange + '%. Immediate protection required.';
         } else if (state === 'WARNING') {
             action = 'Elevated monitoring';
             requiresApproval = false;
-            reason = `Warning level: ${score}/100. Price change: ${rawChange}%. Enhanced monitoring active.`;
+            reason = 'Warning level: ' + score + '/100. Price change: ' + rawChange + '%. Enhanced monitoring active.';
         } else if (state === 'MONITORING') {
             action = 'Standard monitoring';
             requiresApproval = false;
-            reason = `Monitoring: ${score}/100. Price change: ${rawChange}%.`;
+            reason = 'Monitoring: ' + score + '/100. Price change: ' + rawChange + '%.';
         } else if (state === 'RECOVERING') {
             action = 'Recovery detected';
             requiresApproval = false;
-            reason = `Market recovering: ${score}/100. Price change: ${rawChange}%.`;
+            reason = 'Market recovering: ' + score + '/100. Price change: ' + rawChange + '%.';
         } else {
             action = 'Safe operation';
             requiresApproval = false;
-            reason = `Safe: ${score}/100. Price change: ${rawChange}%.`;
+            reason = 'Safe: ' + score + '/100. Price change: ' + rawChange + '%.';
         }
 
-        const policy = {
-            id: `policy-${Date.now()}`,
+        // Build the base policy object (without policyHash)
+        const basePolicy = {
+            id: 'policy-' + Date.now(),
             timestamp: new Date().toISOString(),
             riskScore: score,
             riskLevel: level,
@@ -43,6 +44,7 @@ class PolicyEngine {
             action: action,
             reason: reason,
             requiresApproval: requiresApproval,
+            oracleHash: marketData.oracleHash || null,
             marketData: {
                 priceChange: rawChange,
                 currentPrice: marketData.currentPrice,
@@ -51,9 +53,18 @@ class PolicyEngine {
             executed: false
         };
 
+        // Compute SHA-256 hash of the base policy (BEFORE adding policyHash)
+        const policyString = JSON.stringify(basePolicy, Object.keys(basePolicy).sort());
+        const policyHash = crypto.createHash('sha256').update(policyString).digest('hex');
+
+        // Now add the hash to the policy
+        const policy = {
+            ...basePolicy,
+            policyHash: policyHash
+        };
+
         this.policies.push(policy);
         
-        // Keep only last 50 policies
         if (this.policies.length > 50) {
             this.policies.shift();
         }

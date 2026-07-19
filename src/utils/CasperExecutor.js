@@ -7,7 +7,7 @@ class CasperExecutor {
     }
 
     deployTransaction(policy) {
-        const { riskScore, state, rawChange } = policy;
+        const { riskScore, state, rawChange, oracleHash, policyHash } = policy;
         
         const script = `#!/bin/bash
 cd ${CONFIG.contractDir}
@@ -23,7 +23,10 @@ casper-client put-transaction session \
   --session-arg "status:string='${state}'" \
   --session-arg "price_change:string='${rawChange}'" \
   --session-arg "asset:string='${CONFIG.asset}'" \
-  --session-arg "last_action:string='${policy.action}'"
+  --session-arg "last_action:string='${policy.action}'" \
+  --session-arg "oracle_hash:string='${oracleHash || 'none'}'" \
+  --session-arg "policy_hash:string='${policyHash || 'none'}'" \
+  --session-arg "agent_version:string='2.1.0'"
 `;
 
         const scriptPath = '/tmp/deploy_liquidity_shield.sh';
@@ -33,16 +36,14 @@ casper-client put-transaction session \
             fs.writeFileSync(scriptPath, script);
             fs.chmodSync(scriptPath, '755');
             
-            const output = execSync(`bash ${scriptPath} 2>&1`, { 
+            const output = execSync('bash ' + scriptPath + ' 2>&1', { 
                 encoding: 'utf8', 
                 timeout: 120000 
             });
             
-            // Parse JSON response
             let hash = null;
             try {
                 const json = JSON.parse(output);
-                // Handle nested format: transaction_hash.Version1
                 if (json.result?.transaction_hash) {
                     const txHash = json.result.transaction_hash;
                     if (typeof txHash === 'string') {
@@ -53,12 +54,10 @@ casper-client put-transaction session \
                         hash = txHash.Deploy;
                     }
                 }
-                // Also check for deploy_hash
                 if (!hash && json.result?.deploy_hash) {
                     hash = json.result.deploy_hash;
                 }
             } catch (e) {
-                // Fallback: try regex patterns
                 const match = output.match(/([a-f0-9]{64})/i);
                 if (match) hash = match[1];
             }
@@ -76,7 +75,7 @@ casper-client put-transaction session \
             return {
                 success: true,
                 hash: hash,
-                explorerUrl: `https://testnet.cspr.live/deploy/${hash}`
+                explorerUrl: 'https://testnet.cspr.live/deploy/' + hash
             };
         } catch (err) {
             return {
