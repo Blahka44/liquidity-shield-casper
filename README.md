@@ -1,59 +1,119 @@
-# Liquidity Shield — Casper Agentic Buildathon 2026
+# Liquidity Shield
+
+> **Verifiable Autonomous Risk Management for Casper Network**
+>
+> Every autonomous decision is cryptographically linked to the exact market data that produced it, allowing any third party to independently verify that no data was altered before execution.
+
+---
 
 ## Problem
 
-DeFi liquidity providers lose billions to sudden market crashes because they can't react fast enough. Manual monitoring fails when prices drop 20% in minutes while you're asleep. Liquidity Shield is an autonomous agent that never sleeps, never panics, and executes protective state transitions based on code — not emotion.
+DeFi liquidity providers lose billions to sudden market crashes because they cannot react fast enough. Manual monitoring fails when prices drop 20% in minutes while the operator is asleep. Existing solutions require trusting the agent's internal state — a black box that consumers cannot audit.
 
-## What
+## What We Built
 
-An autonomous risk monitoring agent that evaluates market conditions and executes protective state transitions on Casper Network without human intervention.
+Liquidity Shield is an autonomous risk monitoring agent that evaluates market conditions and executes protective state transitions on Casper Network. Unlike conventional automation, every decision carries cryptographic proof of the data and policy that produced it, enabling independent verification without trusting the agent.
 
-## Architecture
+---
 
-CoinGecko → Observer → Risk Analysis → Casper Transaction → Smart Contract → Dashboard
+## System Invariants
+
+| Invariant | Guarantee |
+|-----------|-----------|
+| **Invariant 1** | Every policy references exactly one oracle snapshot |
+| **Invariant 2** | Every oracle snapshot has one immutable SHA-256 hash |
+| **Invariant 3** | Every blockchain transaction references one policy hash |
+| **Invariant 4** | Every audit record is reproducible |
+
+---
+
+## Trust Architecture
+CoinGecko API
+|
+v
+SHA-256 Oracle Hash
+|
+v
+Risk Engine
+|
+v
+Policy Engine
+|
+v
+SHA-256 Policy Hash
+|
+v
+Casper Executor
+|
+v
+Casper Testnet
+|
+v
+Independent Verification
+plain
+
+**Traceability:** Oracle Hash → Policy Hash → Transaction Hash. Every object references its parent.
+
+---
 
 ## Components
 
-| Layer | Tech | Purpose |
-|-------|------|---------|
-| Market Observer | Node.js | Fetches CSPR price data |
-| Risk Analysis | Deterministic JS | Evaluates risk score against threshold |
-| Casper Executor | casper-client | Signs and deploys state transitions |
-| Smart Contract | Rust/WASM | Stores vault state on-chain |
-| Dashboard | HTML/CSS/JS | Displays metrics and audit trail |
+| Module | Responsibility | Key Feature |
+|--------|---------------|-------------|
+| `OracleService` | Fetch market data | SHA-256 hash of raw JSON before parsing |
+| `RiskEngine` | Multi-factor scoring | Price (60%) + Volatility (25%) + Trend (15%) |
+| `PolicyEngine` | Generate decisions | Structured policy with cryptographic fingerprint |
+| `CasperExecutor` | Deploy transactions | Handles Casper API v2.0 nested hash format |
+| `AuditLogger` | Record history | Append-only structured events |
+| `VerificationService` | Independent validation | Recomputes hashes, detects tampering |
+| `StateManager` | Persist state | JSON storage with versioning |
 
-## How it works
+---
 
-1. **Observe** — Fetches CSPR price data from CoinGecko API
-2. **Evaluate** — Calculates risk score based on 24h price change vs configurable threshold
-3. **Act** — Automatically deploys state transitions to Casper Testnet when risk exceeds threshold
-4. **Audit** — Every action is recorded with transaction hashes on-chain and displayed in real-time dashboard
+## State Machine
+SAFE --> MONITORING --> WARNING --> CRITICAL --> RECOVERING --> SAFE
+plain
 
-## Demo Video
+| State | Risk Score | Action |
+|-------|-----------|--------|
+| SAFE | 0-30 | No deployment |
+| MONITORING | 31-50 | Standard monitoring |
+| WARNING | 51-75 | Elevated monitoring + deploy |
+| CRITICAL | 76-100 | Protection triggered + deploy |
+| RECOVERING | Variable | Recovery detected |
 
-https://www.loom.com/share/95bf4f11eecb43c88c0a464ee7d30202
+---
 
-## Live Transactions
+## Verification Demo
 
-Account: `016c9af86e958e3d67963936e69396ba5db8a355272aa06dd0298afb41ca1d940f`
-
-| Transaction | Action |
-|-------------|--------|
-| [0ddadb71...611c](https://testnet.cspr.live/deploy/0ddadb71e096f2976428ab56c904f76a5e26237245421560b07e4aee4f3b611c) | Vault creation |
-| [eb26b40c...0443f](https://testnet.cspr.live/deploy/eb26b40cfbc5f87434536516b9e82b5ac9db6f9a19dceb218bdce76b1280443f) | Protection triggered |
-| [418b758f...de113](https://testnet.cspr.live/deploy/418b758fa2dc027f6e907467b34843aecc4f28b7d5556a7bd27d31f7711de113) | Protection triggered |
-| [455a8209...dc622](https://testnet.cspr.live/deploy/455a820927e8c7aa37a15c91752c6a4c77ad2bdeea6eca2f9f7d3ce4609dc622) | Monitoring (STANDBY) |
-
-10+ confirmed transactions with full audit trail. Dashboard updates in real-time.
-
-## Quick Start
+### Verify Authentic Data
 
 ```bash
-# 1. Build contract
-make build-contract
+node test_verification.js
+Expected output:
+plain
+VERIFIED: Oracle response hash matches blockchain record
+VERIFIED: Policy hash matches blockchain record
+YES: Full chain valid
+OVERALL RESULT: VERIFIED
+Detect Tampered Data
+The VerificationService can detect if oracle data was modified after the fact by recomputing the hash and comparing to the on-chain record.
+Live Transactions
+Account: 016c9af86e958e3d67963936e69396ba5db8a355272aa06dd0298afb41ca1d940f
+Table
+Transaction	Action	Version
+0ddadb71...611c	Vault creation	v1.0
+eb26b40c...0443f	Protection triggered	v1.0
+418b758f...de113	Protection triggered	v1.0
+66604fac...43e9f	Protection triggered	v2.1 (with oracle_hash + policy_hash)
+12+ confirmed transactions. Dashboard updates in real-time.
+Quick Start
+bash
+# 1. Install dependencies
+npm install
 
-# 2. Deploy initial state
-casper-client put-transaction session [args...]
+# 2. Build contract
+make build-contract
 
 # 3. Run agent
 node agent.js
@@ -62,34 +122,25 @@ node agent.js
 python3 -m http.server 8000
 # Open http://localhost:8000/dashboard.html
 
-Testing
-1. Build the contract
-bash
-make build-contract
-
-2. Start the agent
-bash
-node agent.js
-
-3. Verify on Casper Testnet
-Check your account on https://testnet.cspr.live
-Look for new transactions every 5 minutes
-Transaction type should show "WASM deploy"
-
-4. View the dashboard
-bash
-python3 -m http.server 8000
-# Open http://localhost:8000/dashboard.html5. Check audit log
-5.Check audit log
-bash
-cat audit_log.json
-Each entry contains timestamp, transaction hash, risk score, and status.
-
-Data Sources and Trust Model
-Price Oracle: CoinGecko API (trusted third-party source)
-Action Attestation: All agent decisions are recorded as permanent, verifiable transactions on Casper Testnet
-Guarantee Scope: The blockchain guarantees the agent acted deterministically based on the feed. Feed accuracy depends on CoinGecko data integrity.
-Verification: Anyone can verify transactions independently at https://testnet.cspr.live using the account hash provided above.
-
+# 5. Verify hashes
+node test_verification.js
+Tech Stack
+Table
+Layer	Technology
+Agent Runtime	Node.js 20
+Smart Contract	Rust + WASM
+Blockchain	Casper Network (Testnet)
+Price Oracle	CoinGecko API
+Cryptography	Node.js crypto (SHA-256)
+Dashboard	Vanilla HTML/CSS/JS
+Why Casper?
+Casper's account-based model and predictable gas costs make it ideal for autonomous agents that must operate reliably without human intervention. The put-transaction API v2.0 provides structured JSON responses that enable programmatic hash extraction — critical for verifiable automation.
+Future Roadmap
+[ ] Multi-oracle aggregation (CoinGecko + Binance + Chainlink)
+[ ] TEE-based execution environments for hardware attestation
+[ ] Governance module for multi-sig critical actions
+[ ] Mainnet deployment with production-grade monitoring
 Contact
-abuchianah3@gmail.com
+Abuchi Anah — abuchianah3@gmail.com
+GitHub: https://github.com/Blahka44/liquidity-shield-casper
+DoraHacks: https://dorahacks.io/buidl/46744
