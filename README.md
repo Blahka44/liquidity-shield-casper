@@ -1,3 +1,13 @@
+## 🎥 Live Demo
+[Watch the 90-second demo](https://www.loom.com/share/c3944f7ec8b5484db2457faa67274666)
+
+## 🔗 Live Contracts (Casper Testnet)
+| Contract | Hash | Entry Points |
+|---|---|---|
+| **Audit Contract** |  | , ,  |
+| **Vault Contract** |  | ,  |
+
+---
 # Liquidity Shield
 
 > **Verifiable Autonomous Risk Management for Casper Network**
