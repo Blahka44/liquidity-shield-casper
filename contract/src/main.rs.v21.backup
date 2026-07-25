@@ -1,0 +1,146 @@
+#![no_std]
+#![no_main]
+
+extern crate alloc;
+
+use alloc::string::{String, ToString};
+use alloc::vec;
+use alloc::vec::Vec;
+use casper_contract::unwrap_or_revert::UnwrapOrRevert;
+use casper_contract::contract_api::{runtime, storage};
+use casper_types::{
+    api_error::ApiError,
+    addressable_entity::{
+        EntityEntryPoint as EntryPoint, EntryPointAccess, EntryPointPayment, EntryPointType, EntryPoints, Parameter,
+    },
+    CLType, CLValue, Key, NamedKeys, URef,
+};
+
+const CONTRACT_PACKAGE_NAME: &str = "liquidity_shield_package";
+const CONTRACT_ACCESS_UREF: &str = "liquidity_shield_access_uref";
+const CONTRACT_KEY: &str = "liquidity_shield_contract";
+
+const LATEST_RISK: &str = "latest_risk_score";
+const LATEST_STATUS: &str = "latest_status";
+const LATEST_ORACLE_HASH: &str = "latest_oracle_hash";
+const LATEST_POLICY_HASH: &str = "latest_policy_hash";
+const LAST_UPDATED: &str = "last_updated";
+const DEPLOY_COUNT: &str = "deploy_count";
+
+fn get_uref(name: &str) -> URef {
+    runtime::get_key(name)
+        .unwrap_or_revert_with(ApiError::MissingKey)
+        .into_uref()
+        .unwrap_or_revert_with(ApiError::UnexpectedKeyVariant)
+}
+
+#[no_mangle]
+pub extern "C" fn record_risk() {
+    let risk_score: u64 = runtime::get_named_arg("risk_score");
+    let status: String = runtime::get_named_arg("status");
+    let oracle_hash: String = runtime::get_named_arg("oracle_hash");
+    let policy_hash: String = runtime::get_named_arg("policy_hash");
+    let timestamp: u64 = runtime::get_named_arg("timestamp");
+
+    let risk_uref: URef = get_uref(LATEST_RISK);
+    storage::write(risk_uref, risk_score);
+
+    let status_uref: URef = get_uref(LATEST_STATUS);
+    storage::write(status_uref, status);
+
+    let oracle_uref: URef = get_uref(LATEST_ORACLE_HASH);
+    storage::write(oracle_uref, oracle_hash);
+
+    let policy_uref: URef = get_uref(LATEST_POLICY_HASH);
+    storage::write(policy_uref, policy_hash);
+
+    let time_uref: URef = get_uref(LAST_UPDATED);
+    storage::write(time_uref, timestamp);
+
+    let counter_uref: URef = get_uref(DEPLOY_COUNT);
+    let current_count: u64 = storage::read(counter_uref)
+        .unwrap_or_revert()
+        .unwrap_or_revert();
+    storage::write(counter_uref, current_count + 1);
+}
+
+#[no_mangle]
+pub extern "C" fn get_latest_risk() {
+    let risk_uref: URef = get_uref(LATEST_RISK);
+    let risk_score: u64 = storage::read(risk_uref)
+        .unwrap_or_revert()
+        .unwrap_or_revert();
+    runtime::ret(CLValue::from_t(risk_score).unwrap_or_revert());
+}
+
+#[no_mangle]
+pub extern "C" fn get_state() {
+    let status_uref: URef = get_uref(LATEST_STATUS);
+    let status: String = storage::read(status_uref)
+        .unwrap_or_revert()
+        .unwrap_or_revert();
+    runtime::ret(CLValue::from_t(status).unwrap_or_revert());
+}
+
+#[no_mangle]
+pub extern "C" fn call() {
+    let risk_uref: URef = storage::new_uref(0u64);
+    let status_uref: URef = storage::new_uref(String::from("INIT"));
+    let oracle_uref: URef = storage::new_uref(String::from("none"));
+    let policy_uref: URef = storage::new_uref(String::from("none"));
+    let time_uref: URef = storage::new_uref(0u64);
+    let counter_uref: URef = storage::new_uref(0u64);
+
+    let mut named_keys = NamedKeys::new();
+    named_keys.insert(LATEST_RISK.to_string(), risk_uref.into());
+    named_keys.insert(LATEST_STATUS.to_string(), status_uref.into());
+    named_keys.insert(LATEST_ORACLE_HASH.to_string(), oracle_uref.into());
+    named_keys.insert(LATEST_POLICY_HASH.to_string(), policy_uref.into());
+    named_keys.insert(LAST_UPDATED.to_string(), time_uref.into());
+    named_keys.insert(DEPLOY_COUNT.to_string(), counter_uref.into());
+
+    let mut entry_points = EntryPoints::new();
+
+    entry_points.add_entry_point(EntryPoint::new(
+        "record_risk",
+        vec![
+            Parameter::new("risk_score", CLType::U64),
+            Parameter::new("status", CLType::String),
+            Parameter::new("oracle_hash", CLType::String),
+            Parameter::new("policy_hash", CLType::String),
+            Parameter::new("timestamp", CLType::U64),
+        ],
+        CLType::Unit,
+        EntryPointAccess::Public,
+        EntryPointType::Called,
+        EntryPointPayment::Caller,
+    ));
+
+    entry_points.add_entry_point(EntryPoint::new(
+        "get_latest_risk",
+        Vec::new(),
+        CLType::U64,
+        EntryPointAccess::Public,
+        EntryPointType::Called,
+        EntryPointPayment::Caller,
+    ));
+
+    entry_points.add_entry_point(EntryPoint::new(
+        "get_state",
+        Vec::new(),
+        CLType::String,
+        EntryPointAccess::Public,
+        EntryPointType::Called,
+        EntryPointPayment::Caller,
+    ));
+
+    let (contract_hash, _contract_version) = storage::new_contract(
+        entry_points,
+        Some(named_keys),
+        Some(CONTRACT_PACKAGE_NAME.to_string()),
+        Some(CONTRACT_ACCESS_UREF.to_string()),
+        None,
+    );
+
+    runtime::put_key(CONTRACT_KEY, contract_hash.into());
+}

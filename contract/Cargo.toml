@@ -1,15 +1,14 @@
 [package]
-name = "contract"
+name = "vault"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-casper-contract = "5.1.1"
-casper-types = "6.0.1"
-base64ct = "=1.6.0"
-zeroize  = "=1.8.1"
+casper-contract = "=5.1.1"
+casper-types = "=6.1.0"
+
 [[bin]]
-name = "contract"
+name = "vault"
 path = "src/main.rs"
 bench = false
 doctest = false
@@ -18,4 +17,3 @@ test = false
 [profile.release]
 codegen-units = 1
 lto = true
-

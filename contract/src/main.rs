@@ -2,31 +2,86 @@
 #![no_main]
 
 extern crate alloc;
-use alloc::string::String;
+
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+use casper_contract::unwrap_or_revert::UnwrapOrRevert;
 use casper_contract::contract_api::{runtime, storage};
-use casper_types::{Key, U512};
+use casper_types::{
+    api_error::ApiError,
+    addressable_entity::{
+        EntityEntryPoint as EntryPoint, EntryPointAccess, EntryPointPayment, EntryPointType, EntryPoints,
+    },
+    CLType, CLValue, Key, NamedKeys, URef,
+};
+
+const CONTRACT_PACKAGE_NAME: &str = "liquidity_shield_vault_package";
+const CONTRACT_ACCESS_UREF: &str = "liquidity_shield_vault_access_uref";
+const CONTRACT_KEY: &str = "liquidity_shield_vault_contract";
+
+const PAUSED: &str = "paused";
+const PAUSE_COUNT: &str = "pause_count";
+
+fn get_uref(name: &str) -> URef {
+    runtime::get_key(name)
+        .unwrap_or_revert_with(ApiError::MissingKey)
+        .into_uref()
+        .unwrap_or_revert_with(ApiError::UnexpectedKeyVariant)
+}
+
+#[no_mangle]
+pub extern "C" fn pause() {
+    let paused_uref: URef = get_uref(PAUSED);
+    storage::write(paused_uref, true);
+
+    let counter_uref: URef = get_uref(PAUSE_COUNT);
+    let current: u64 = storage::read(counter_uref).unwrap_or_revert().unwrap_or_revert();
+    storage::write(counter_uref, current + 1);
+}
+
+#[no_mangle]
+pub extern "C" fn is_paused() {
+    let paused_uref: URef = get_uref(PAUSED);
+    let paused: bool = storage::read(paused_uref).unwrap_or_revert().unwrap_or_revert();
+    runtime::ret(CLValue::from_t(paused).unwrap_or_revert());
+}
 
 #[no_mangle]
 pub extern "C" fn call() {
-    let risk_score: u64 = runtime::get_named_arg("risk_score");
-    let status: String = runtime::get_named_arg("status");
-    let price_change: String = runtime::get_named_arg("price_change");
-    let asset: String = runtime::get_named_arg("asset");
-    let last_action: String = runtime::get_named_arg("last_action");
-    
-    // v2.1: Cryptographic verification fields
-    let oracle_hash: String = runtime::get_named_arg("oracle_hash");
-    let policy_hash: String = runtime::get_named_arg("policy_hash");
-    let agent_version: String = runtime::get_named_arg("agent_version");
+    let paused_uref: URef = storage::new_uref(false);
+    let counter_uref: URef = storage::new_uref(0u64);
 
-    runtime::put_key("risk_score", Key::from(storage::new_uref(U512::from(risk_score))));
-    runtime::put_key("status", Key::from(storage::new_uref(status)));
-    runtime::put_key("price_change", Key::from(storage::new_uref(price_change)));
-    runtime::put_key("asset", Key::from(storage::new_uref(asset)));
-    runtime::put_key("last_action", Key::from(storage::new_uref(last_action)));
-    
-    // v2.1: Store verification hashes
-    runtime::put_key("oracle_hash", Key::from(storage::new_uref(oracle_hash)));
-    runtime::put_key("policy_hash", Key::from(storage::new_uref(policy_hash)));
-    runtime::put_key("agent_version", Key::from(storage::new_uref(agent_version)));
+    let mut named_keys = NamedKeys::new();
+    named_keys.insert(PAUSED.to_string(), paused_uref.into());
+    named_keys.insert(PAUSE_COUNT.to_string(), counter_uref.into());
+
+    let mut entry_points = EntryPoints::new();
+
+    entry_points.add_entry_point(EntryPoint::new(
+        "pause",
+        Vec::new(),
+        CLType::Unit,
+        EntryPointAccess::Public,
+        EntryPointType::Called,
+        EntryPointPayment::Caller,
+    ));
+
+    entry_points.add_entry_point(EntryPoint::new(
+        "is_paused",
+        Vec::new(),
+        CLType::Bool,
+        EntryPointAccess::Public,
+        EntryPointType::Called,
+        EntryPointPayment::Caller,
+    ));
+
+    let (contract_hash, _) = storage::new_contract(
+        entry_points,
+        Some(named_keys),
+        Some(CONTRACT_PACKAGE_NAME.to_string()),
+        Some(CONTRACT_ACCESS_UREF.to_string()),
+        None,
+    );
+
+    runtime::put_key(CONTRACT_KEY, contract_hash.into());
 }

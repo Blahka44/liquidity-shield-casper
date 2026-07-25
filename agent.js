@@ -16,7 +16,7 @@ class LiquidityShieldAgent {
         this.stateManager = new StateManager();
     }
 
-    async run() {
+    async run(forceDeploy = false) {
         Logger.banner();
 
         try {
@@ -37,21 +37,26 @@ class LiquidityShieldAgent {
 
             // Step 4: Execute if needed
             let txResult = { success: false };
-            
-            // Deploy on CRITICAL, WARNING, or significant state changes
-            const shouldDeploy = (
-                riskAssessment.state === 'CRITICAL' || 
+
+            // Deploy on CRITICAL, WARNING, significant state changes, or if forced
+            const shouldDeploy = forceDeploy || (
+                riskAssessment.state === 'CRITICAL' ||
                 riskAssessment.state === 'WARNING' ||
                 (riskAssessment.state === 'MONITORING' && riskAssessment.score >= 60)
             );
 
             if (shouldDeploy) {
                 console.log('🚀 Policy Engine: Executing state transition on Casper...');
+                
+                // Attach rawChange for CasperExecutor
+                policy.rawChange = marketData.priceChange;
+
                 txResult = this.executor.deployTransaction(policy);
                 Logger.transaction(txResult);
 
                 if (txResult.success) {
                     this.audit.logTransaction(policy, txResult.hash);
+                    console.log('✅ Deployment recorded in audit log with hashes');
                 } else {
                     this.audit.logError('casper_executor', new Error(txResult.error), {
                         riskScore: riskAssessment.score,
@@ -65,8 +70,8 @@ class LiquidityShieldAgent {
 
             // Step 5: Update state
             const newState = this.stateManager.updateState(
-                riskAssessment, 
-                policy, 
+                riskAssessment,
+                policy,
                 txResult.success ? txResult.hash : null
             );
             Logger.state(newState);
@@ -86,5 +91,6 @@ module.exports = LiquidityShieldAgent;
 // Run the agent if this file is executed directly
 if (require.main === module) {
     const agent = new LiquidityShieldAgent();
+    // Pass true to force deployment even in SAFE state
     agent.run();
 }

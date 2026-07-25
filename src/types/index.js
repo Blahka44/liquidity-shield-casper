@@ -5,7 +5,8 @@ const CONFIG = {
     wasmPath: 'contract/target/wasm32-unknown-unknown/release/contract.wasm',
     secretKeyPath: '../secret_key.pem',
     threshold: 15,
-    asset: 'CSPR'
+    asset: 'CSPR',
+    vaultHash: "hash-3a3692c8c3628c5213603efa44a0d261cb11b17d5aa7e98d29f5f883cf4b6164",
 };
 
 // State Machine States

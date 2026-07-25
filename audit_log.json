@@ -1,119 +1,467 @@
 [
   {
-    "timestamp": "2026-07-06T11:55:31.568Z",
-    "tx_hash": "0ddadb71e096f2976428ab56c904f76a5e26237245421560b07e4aee4f3b611c",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "PROTECTION_TRIGGERED",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1784998932203-ci977wuby",
+    "timestamp": "2026-07-25T17:02:12.204Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "oracle",
+    "action": "fetch_market_data",
+    "reason": "Fetched CSPR price: $0.00153296, change: 1.43306%",
+    "riskScore": null,
+    "state": null,
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "source": "coingecko",
+      "timestamp": "2026-07-25T17:02:10.359Z",
+      "oracleHash": "a55bfcab2ff9d113620a9ad84dbd9f8bd89d1865586ec7f3a34c477667a69230"
+    }
   },
   {
-    "timestamp": "2026-07-06T12:08:27.244Z",
-    "tx_hash": "2db68d0ddce9df2318e482ff0aeb72925abdd0d351f6f0559eedd47e3f56bfba",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "PROTECTION_TRIGGERED",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1784998932208-td3fp82v2",
+    "timestamp": "2026-07-25T17:02:12.208Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 80/100 (SAFE)",
+    "riskScore": 80,
+    "state": "SAFE",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 80,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
   },
   {
-    "timestamp": "2026-07-06T12:09:04.120Z",
-    "tx_hash": "bf672cc42e53cc7df79537f17c05ad83ad7bdf33c380aa5bc071c80e3c7725b3",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "PROTECTION_TRIGGERED",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1784998932654-9hst5476y",
+    "timestamp": "2026-07-25T17:02:12.654Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 85/100 (CRITICAL)",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 20,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
   },
   {
-    "timestamp": "2026-07-06T12:36:48.684Z",
-    "tx_hash": "5d7e60d5142551f442926387deec89a2656ef753ff41b566071b8aa830de0100",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1784998932667-0e0trcohy",
+    "timestamp": "2026-07-25T17:02:12.667Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "policy_engine",
+    "action": "policy_generated",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "policyId": "policy-1784998932666",
+      "action": "Protection triggered",
+      "oracleHash": "300be5d8c48062b12f9b106929b2da990faf4672bfe2faae0e2ef3ddb36fa71e",
+      "policyHash": "50d9a8d758f98ebd2b6888323325eff26f3779257436bc6648db31c47a315423"
+    }
   },
   {
-    "timestamp": "2026-07-06T14:39:26.464Z",
-    "tx_hash": "de5b6036992756cb6b77c4dbb1ec385988ff7cd5864f4755d232a36afe1e479f",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1784998934964-jepx3ijs1",
+    "timestamp": "2026-07-25T17:02:14.964Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "casper_executor",
+    "action": "deploy_transaction",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": "f8e367357455e71c5e6d75d9c7ff417d0252483cf979c8e74e4f465961e6d746",
+    "result": "success",
+    "metadata": {
+      "policyId": "policy-1784998932666",
+      "oracleHash": "300be5d8c48062b12f9b106929b2da990faf4672bfe2faae0e2ef3ddb36fa71e",
+      "policyHash": "50d9a8d758f98ebd2b6888323325eff26f3779257436bc6648db31c47a315423",
+      "explorerUrl": "https://testnet.cspr.live/deploy/f8e367357455e71c5e6d75d9c7ff417d0252483cf979c8e74e4f465961e6d746"
+    }
   },
   {
-    "timestamp": "2026-07-06T15:28:47.856Z",
-    "tx_hash": "455a820927e8c7aa37a15c91752c6a4c77ad2bdeea6eca2f9f7d3ce4609dc622",
-    "risk_score": 33,
-    "status": "STANDBY",
-    "last_action": "Monitoring",
-    "price_change_24h": "-5.00",
-    "threshold": 15
+    "id": "evt-1785003017101-czqsxr7k4",
+    "timestamp": "2026-07-25T18:10:17.102Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "oracle",
+    "action": "fetch_market_data",
+    "reason": "Fetched CSPR price: $0.0015408, change: 2.59334%",
+    "riskScore": null,
+    "state": null,
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "source": "coingecko",
+      "timestamp": "2026-07-25T18:10:15.963Z",
+      "oracleHash": "1ec222513a88c5469c57a5bbe40d2fb87d3d3a28039cb9a1944949b889207a83"
+    }
   },
   {
-    "timestamp": "2026-07-06T18:21:40.396Z",
-    "tx_hash": "7643b8ee57ceba3700b58f7ebcae07fd31ccd74dc7c92524e6df9f8e44eddceb",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785003017125-0ir6a58dv",
+    "timestamp": "2026-07-25T18:10:17.125Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 80/100 (SAFE)",
+    "riskScore": 80,
+    "state": "SAFE",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 80,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
   },
   {
-    "timestamp": "2026-07-06T18:53:42.806Z",
-    "tx_hash": "47af0789c3904dc157f7743bec918a34b69eeaec6359993be3c7c3746dc39294",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785003017638-tbsjyomq4",
+    "timestamp": "2026-07-25T18:10:17.638Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 85/100 (CRITICAL)",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 20,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
   },
   {
-    "timestamp": "2026-07-07T08:18:29.863Z",
-    "tx_hash": "418b758fa2dc027f6e907467b34843aecc4f28b7d5556a7bd27d31f7711de113",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785003017639-k6r4hztfj",
+    "timestamp": "2026-07-25T18:10:17.639Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "policy_engine",
+    "action": "policy_generated",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "policyId": "policy-1785003017639",
+      "action": "Protection triggered",
+      "oracleHash": "0f0a5495c51ac7d4e8bad8f3291d95690ddeb4fef7be5980f9c51da1f3e6cc6c",
+      "policyHash": "c336110da4b4e1f51999de874c07b0680e7a89e823a20e0ef1c8122c43491f53"
+    }
   },
   {
-    "timestamp": "2026-07-07T08:45:00.807Z",
-    "tx_hash": "eb26b40cfbc5f87434536516b9e82b5ac9db6f9a19dceb218bdce76b1280443f",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785003019929-e8kt3fjdp",
+    "timestamp": "2026-07-25T18:10:19.929Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "casper_executor",
+    "action": "deploy_transaction",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": "813319bcfa23a296e4decce7902a54eae77b71b9fbede645bc16255fd3846c55",
+    "result": "success",
+    "metadata": {
+      "policyId": "policy-1785003017639",
+      "oracleHash": "0f0a5495c51ac7d4e8bad8f3291d95690ddeb4fef7be5980f9c51da1f3e6cc6c",
+      "policyHash": "c336110da4b4e1f51999de874c07b0680e7a89e823a20e0ef1c8122c43491f53",
+      "explorerUrl": "https://testnet.cspr.live/deploy/813319bcfa23a296e4decce7902a54eae77b71b9fbede645bc16255fd3846c55"
+    }
   },
   {
-    "timestamp": "2026-07-09T18:42:02.414Z",
-    "tx_hash": "574774345d86ed4333845b10672f535f56997524997ff2ee1280497df20d804b",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785007060561-kxhkqxpaz",
+    "timestamp": "2026-07-25T19:17:40.562Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "oracle",
+    "action": "fetch_market_data",
+    "reason": "Fetched CSPR price: $0.0015444, change: 0.72974%",
+    "riskScore": null,
+    "state": null,
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "source": "coingecko",
+      "timestamp": "2026-07-25T19:17:39.198Z",
+      "oracleHash": "250ce9b1bd65af7d36ffe0aaff36b183db31e60ee2000fa5ab1a01971077eb0c"
+    }
   },
   {
-    "timestamp": "2026-07-09T19:24:20.917Z",
-    "tx_hash": "f289b1e75dbf3eb9fdc9d933a9e303e5d0d80b9d33240f877526048d8a2da0b8",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785007060602-kn76d9nco",
+    "timestamp": "2026-07-25T19:17:40.602Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 80/100 (SAFE)",
+    "riskScore": 80,
+    "state": "SAFE",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 80,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
   },
   {
-    "timestamp": "2026-07-10T14:33:54.460Z",
-    "tx_hash": "974764407057b16d3dbed83e90d0e38ba0195e493101ba8342eb8eb3426a2c08",
-    "risk_score": 100,
-    "status": "ACTIVE",
-    "last_action": "Protection triggered",
-    "price_change_24h": "-18.50",
-    "threshold": 15
+    "id": "evt-1785007061205-3mbe5ibbv",
+    "timestamp": "2026-07-25T19:17:41.205Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 85/100 (CRITICAL)",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 32,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
+  },
+  {
+    "id": "evt-1785007061213-mwpgdj6ci",
+    "timestamp": "2026-07-25T19:17:41.213Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "policy_engine",
+    "action": "policy_generated",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "policyId": "policy-1785007061207",
+      "action": "Protection triggered",
+      "oracleHash": "1204d05f0fc59993a1e114aa3167dd1045fa0358ef111809d7603801de831687",
+      "policyHash": "658f400253ecf77e6448000e29109be5ed1fed15cca32132b02da8ebf998d34e"
+    }
+  },
+  {
+    "id": "evt-1785007063682-1k8w5lnqc",
+    "timestamp": "2026-07-25T19:17:43.682Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "casper_executor",
+    "action": "deploy_transaction",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": "0f8251c0c486497bda52baaf63c43ccdf52fb3b548f3704a2ba87e33b2ad429f",
+    "result": "success",
+    "metadata": {
+      "policyId": "policy-1785007061207",
+      "oracleHash": "1204d05f0fc59993a1e114aa3167dd1045fa0358ef111809d7603801de831687",
+      "policyHash": "658f400253ecf77e6448000e29109be5ed1fed15cca32132b02da8ebf998d34e",
+      "explorerUrl": "https://testnet.cspr.live/deploy/0f8251c0c486497bda52baaf63c43ccdf52fb3b548f3704a2ba87e33b2ad429f"
+    }
+  },
+  {
+    "id": "evt-1785007326485-mqcq3aawh",
+    "timestamp": "2026-07-25T19:22:06.487Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "oracle",
+    "action": "fetch_market_data",
+    "reason": "Fetched CSPR price: $0.00154328, change: 0.58538%",
+    "riskScore": null,
+    "state": null,
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "source": "coingecko",
+      "timestamp": "2026-07-25T19:22:04.849Z",
+      "oracleHash": "a53f2fa630ca3a1a23fd9229aca71562f264559428ec464ae787f54ec56dda90"
+    }
+  },
+  {
+    "id": "evt-1785007326576-0ptdmpfqe",
+    "timestamp": "2026-07-25T19:22:06.576Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 80/100 (SAFE)",
+    "riskScore": 80,
+    "state": "SAFE",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 80,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
+  },
+  {
+    "id": "evt-1785007327092-mwmvxh2cv",
+    "timestamp": "2026-07-25T19:22:07.093Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 85/100 (CRITICAL)",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 20,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
+  },
+  {
+    "id": "evt-1785007327139-8w0y3vl22",
+    "timestamp": "2026-07-25T19:22:07.139Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "policy_engine",
+    "action": "policy_generated",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "policyId": "policy-1785007327136",
+      "action": "Protection triggered",
+      "oracleHash": "5e9aeb60d59cf40a5eb6b4d22af9cf76fef63c27fb60d428cbd382dbbdc60550",
+      "policyHash": "d8985848dd38c9eb7fe46c3e911b7e8d5a8ec261edd2b0ef9faab4c147d15b09"
+    }
+  },
+  {
+    "id": "evt-1785007330952-ee0x7j6qu",
+    "timestamp": "2026-07-25T19:22:10.954Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "casper_executor",
+    "action": "deploy_transaction",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": "8424cfbf96301024cda3a040fcf01ef8b272d4eb948193497476aaeca1fcf47e",
+    "result": "success",
+    "metadata": {
+      "policyId": "policy-1785007327136",
+      "oracleHash": "5e9aeb60d59cf40a5eb6b4d22af9cf76fef63c27fb60d428cbd382dbbdc60550",
+      "policyHash": "d8985848dd38c9eb7fe46c3e911b7e8d5a8ec261edd2b0ef9faab4c147d15b09",
+      "explorerUrl": "https://testnet.cspr.live/deploy/8424cfbf96301024cda3a040fcf01ef8b272d4eb948193497476aaeca1fcf47e"
+    }
+  },
+  {
+    "id": "evt-1785008724478-d78v1kz5c",
+    "timestamp": "2026-07-25T19:45:24.512Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "oracle",
+    "action": "fetch_market_data",
+    "reason": "Fetched CSPR price: $0.00154205, change: 1.29085%",
+    "riskScore": null,
+    "state": null,
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "source": "coingecko",
+      "timestamp": "2026-07-25T19:45:20.156Z",
+      "oracleHash": "19d9a1521d2d4ab70b0be46dd8bd5da7f5faf255346eca3c8bb01d39aee6c219"
+    }
+  },
+  {
+    "id": "evt-1785008724947-brxe9anla",
+    "timestamp": "2026-07-25T19:45:24.948Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 80/100 (SAFE)",
+    "riskScore": 80,
+    "state": "SAFE",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 80,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
+  },
+  {
+    "id": "evt-1785008725547-x5oxr7pu7",
+    "timestamp": "2026-07-25T19:45:25.547Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "risk_engine",
+    "action": "risk_assessment",
+    "reason": "Risk score: 85/100 (CRITICAL)",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "factors": {
+        "base": 32,
+        "volatility": 0,
+        "trend": 0,
+        "llmSentiment": "neutral"
+      }
+    }
+  },
+  {
+    "id": "evt-1785008725556-4rtf5216z",
+    "timestamp": "2026-07-25T19:45:25.556Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "policy_engine",
+    "action": "policy_generated",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": null,
+    "result": "pending",
+    "metadata": {
+      "policyId": "policy-1785008725552",
+      "action": "Protection triggered",
+      "oracleHash": "192717ffb34f98e3794d17c6f8bb624b771bfaac916ab7f6f664ede06c47bd86",
+      "policyHash": "31c91883a14c4b91cd26e43fff48781a0ebbd85caee62c4bcb87e70cc44c1fca"
+    }
+  },
+  {
+    "id": "evt-1785008729637-yzmvonk6e",
+    "timestamp": "2026-07-25T19:45:29.638Z",
+    "actor": "LiquidityShieldAgent",
+    "component": "casper_executor",
+    "action": "deploy_transaction",
+    "reason": "Critical risk detected: 85/100. Price change: -18.50%. Immediate protection required.",
+    "riskScore": 85,
+    "state": "CRITICAL",
+    "transactionHash": "bb6fd98f9764098dd5eef653ab13514b3a697ce056bb0ccdc06b464874d1445e",
+    "result": "success",
+    "metadata": {
+      "policyId": "policy-1785008725552",
+      "oracleHash": "192717ffb34f98e3794d17c6f8bb624b771bfaac916ab7f6f664ede06c47bd86",
+      "policyHash": "31c91883a14c4b91cd26e43fff48781a0ebbd85caee62c4bcb87e70cc44c1fca",
+      "explorerUrl": "https://testnet.cspr.live/deploy/bb6fd98f9764098dd5eef653ab13514b3a697ce056bb0ccdc06b464874d1445e"
+    }
   }
 ]

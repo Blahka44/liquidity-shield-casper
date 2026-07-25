@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -250,13 +251,16 @@
         .audit-table tr { transition: background 0.2s; }
         .audit-table tr:hover { background: rgba(255,255,255,0.02); }
         .audit-table tr:last-child td { border-bottom: none; }
+
         .tx-hash {
             font-family: var(--font-mono);
             font-size: 0.8rem;
             color: var(--accent-cyan);
-            text-decoration: none;
+            text-decoration: underline;
+            cursor: pointer;
             transition: opacity 0.2s;
         }
+
         .tx-hash:hover { opacity: 0.7; }
         .badge {
             display: inline-flex;
@@ -270,6 +274,10 @@
         }
         .badge-active { background: rgba(255, 71, 87, 0.1); color: var(--accent-red); border: 1px solid rgba(255, 71, 87, 0.15); }
         .badge-standby { background: rgba(0, 212, 160, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 212, 160, 0.15); }
+        .badge-critical { background: rgba(255, 71, 87, 0.15); color: var(--accent-red); border: 1px solid rgba(255, 71, 87, 0.25); }
+        .badge-warning { background: rgba(243, 156, 18, 0.1); color: var(--accent-orange); border: 1px solid rgba(243, 156, 18, 0.2); }
+        .badge-monitoring { background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); border: 1px solid rgba(0, 212, 255, 0.2); }
+        .badge-safe { background: rgba(0, 212, 160, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 212, 160, 0.2); }
         .risk-badge { font-family: var(--font-mono); font-weight: 600; }
         .loading { text-align: center; padding: 60px; color: var(--text-muted); }
         .error { padding: 20px 28px; color: var(--accent-red); background: rgba(255, 71, 87, 0.05); }
@@ -290,6 +298,13 @@
         .metric-card:nth-child(3) { animation-delay: 0.15s; }
         .metric-card:nth-child(4) { animation-delay: 0.2s; }
         .metric-card:nth-child(5) { animation-delay: 0.25s; }
+        .metric-card:nth-child(6) { animation-delay: 0.3s; }
+        .hash-field {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -324,9 +339,17 @@
         </div>
     </div>
     <script>
+     
         async function loadJson(filename) {
             const res = await fetch('./' + filename + '?t=' + Date.now());
-            return res.json();
+            if (!res.ok) {
+                throw new Error('HTTP ' + res.status);
+            }
+            const text = await res.text();
+            if (!text || text.trim() === '') {
+                return [];
+            }
+            return JSON.parse(text);
         }
         function getRiskClass(score) {
             const s = parseInt(score) || 0;
@@ -340,18 +363,36 @@
             return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
         function getAgentDisplay(status, lastAction) {
-            if (status === 'ACTIVE') return 'Protection Active';
+            if (status === 'ACTIVE' || status === 'CRITICAL') return 'Protection Active';
+            if (status === 'WARNING') return 'Elevated Monitoring';
             if (lastAction === 'Evaluating') return 'Evaluating';
             return 'Monitoring';
         }
+        function getStatusBadgeClass(status) {
+            const s = (status || '').toUpperCase();
+            if (s === 'CRITICAL' || s === 'ACTIVE') return 'badge-critical';
+            if (s === 'WARNING') return 'badge-warning';
+            if (s === 'MONITORING') return 'badge-monitoring';
+            return 'badge-safe';
+        }
+        function safeSlice(str, start, end) {
+            if (!str || typeof str !== 'string') return 'N/A';
+            return str.slice(start, end);
+        }
         function renderMetrics(state) {
             const score = parseInt(state.risk_score) || 0;
-            const isActive = state.status === 'ACTIVE';
+            const status = state.state || state.status || 'SAFE';
+            const isActive = status === 'ACTIVE' || status === 'CRITICAL';
             const riskClass = getRiskClass(score);
             const statusClass = isActive ? 'status-active' : 'status-standby';
             const isAlert = isActive;
-            const agentDisplay = getAgentDisplay(state.status, state.last_action);
+            const agentDisplay = getAgentDisplay(status, state.last_action);
             const agentColorClass = isActive ? 'risk-high' : 'risk-low';
+            const priceChange = state.price_change || state.price_change_24h || '0.00';
+            const oracleHash = state.oracle_hash || 'N/A';
+            const policyHash = state.policy_hash || 'N/A';
+            const agentVersion = state.agent_version || state.version || '1.0.0';
+            
             document.getElementById('metrics').innerHTML =
                 '<div class="metric-card">' +
                     '<div class="metric-label"><span>💎</span> Monitored Asset</div>' +
@@ -365,7 +406,7 @@
                 '</div>' +
                 '<div class="metric-card">' +
                     '<div class="metric-label"><span>📉</span> 24h Price Change</div>' +
-                    '<div class="metric-value">' + (state.price_change || '0.00') + '<span class="unit">%</span></div>' +
+                    '<div class="metric-value">' + priceChange + '<span class="unit">%</span></div>' +
                     '<div class="metric-meta">From CoinGecko API</div>' +
                 '</div>' +
                 '<div class="metric-card ' + (isAlert ? 'alert' : '') + '">' +
@@ -373,45 +414,67 @@
                     '<div class="metric-value ' + statusClass + '">' +
                         '<span class="status-pill">' +
                             '<span class="status-dot ' + (isAlert ? 'red' : 'green') + '"></span>' +
-                            (isAlert ? 'ACTIVE' : 'STANDBY') +
+                            status +
                         '</span>' +
                     '</div>' +
-                    '<div class="metric-meta">' + formatTime(state.last_update) + '</div>' +
+                    '<div class="metric-meta">' + formatTime(state.last_update || state.last_updated) + '</div>' +
                 '</div>' +
                 '<div class="metric-card">' +
                     '<div class="metric-label"><span>🤖</span> Agent Status</div>' +
                     '<div class="metric-value ' + agentColorClass + '">' + agentDisplay + '</div>' +
                     '<div class="metric-meta">Last action: ' + (state.last_action || 'Vault created') + '</div>' +
+                '</div>' +
+                '<div class="metric-card">' +
+                    '<div class="metric-label"><span>🔐</span> Verification</div>' +
+                    '<div class="metric-value" style="font-size:0.9rem;">v' + agentVersion + '</div>' +
+                    '<div class="hash-field">Oracle: ' + safeSlice(oracleHash, 0, 16) + '...</div>' +
+                    '<div class="hash-field">Policy: ' + safeSlice(policyHash, 0, 16) + '...</div>' +
                 '</div>';
         }
         function renderAudit(logs) {
-            const count = logs ? logs.length : 0;
+            const logsArray = Array.isArray(logs) ? logs : [];
+            const count = logsArray.length;
             document.getElementById('audit-count').textContent = count + ' event' + (count !== 1 ? 's' : '');
-            if (!logs || logs.length === 0) {
+            if (count === 0) {
                 document.getElementById('audit-content').innerHTML = '<div class="error">No audit records found. Run the agent to generate transactions.</div>';
                 return;
             }
-            const rows = logs.slice().reverse().slice(0, 20).map(function(log) {
-                const isActive = log.status === 'ACTIVE';
-                const actionDisplay = log.last_action || 'Monitoring';
+            const rows = logsArray.slice().reverse().slice(0, 20).map(function(log) {
+                const status = log.state || log.status || 'SAFE';
+                const isActive = status === 'ACTIVE' || status === 'CRITICAL';
+                const actionDisplay = log.last_action || log.action || log.metadata?.action || 'Monitoring';
+                let priceChange = log.price_change || log.price_change_24h || log.metadata?.priceChange;
+                if (!priceChange && log.reason) {
+                    const match = log.reason.match(/change:\s*([-\d.]+)%/);
+                    if (match) priceChange = match[1];
+                }
+                priceChange = priceChange || '0.00';
+                const riskScore = log.risk_score !== undefined ? log.risk_score : (log.riskScore !== undefined ? log.riskScore : (log.metadata?.factors ? Math.round((log.metadata.factors.base || 0) + (log.metadata.factors.volatility || 0) + (log.metadata.factors.trend || 0)) : null));
+                const txHash = log.tx_hash || log.hash || log.transactionHash || '';
+                const badgeClass = getStatusBadgeClass(status);
+                const hashDisplay = txHash ?
+                    safeSlice(txHash, 0, 12) + '...' + safeSlice(txHash, -8) :
+                    'N/A';
+                const hashLink = txHash ?
+                    'https://testnet.cspr.live/transaction/' + txHash :
+                    '#';
+
                 return '<tr>' +
                     '<td>' + formatTime(log.timestamp) + '</td>' +
-                    '<td><span class="badge ' + (isActive ? 'badge-active' : 'badge-standby') + '">' +
+                    '<td><span class="badge ' + badgeClass + '">' +
                         '<span class="status-dot ' + (isActive ? 'red' : 'green') + '" style="width:6px;height:6px;"></span>' +
-                        log.status +
+                        status +
                     '</span></td>' +
                     '<td>' + actionDisplay + '</td>' +
-                    '<td class="risk-badge ' + getRiskClass(log.risk_score) + '">' + log.risk_score + '/100</td>' +
-                    '<td>' + log.price_change_24h + '%</td>' +
-                    '<td><a class="tx-hash" href="https://testnet.cspr.live/deploy/' + log.tx_hash + '" target="_blank" rel="noopener">' +
-                        log.tx_hash.slice(0, 12) + '...' + log.tx_hash.slice(-8) +
-                    '</a></td>' +
+                    '<td class="risk-badge ' + (riskScore !== null ? getRiskClass(riskScore) : '') + '">' + (riskScore !== null ? riskScore + '/100' : '-') + '</td>' +
+                    '<td>' + priceChange + '%</td>' +
+                    '<td>' + (txHash ? '<a class="tx-hash" href="' + hashLink + '" target="_blank" rel="noopener">' + hashDisplay + '</a>' : 'N/A') + '</td>' +
                 '</tr>';
             }).join('');
             document.getElementById('audit-content').innerHTML =
                 '<div style="overflow-x: auto;">' +
                     '<table class="audit-table">' +
-                        '<thead><tr><th>Time</th><th>Status</th><th>Action</th><th>Risk</th><th>Change</th><th>Transaction</th></tr></thead>' +
+                        '<thead><tr><th>Time</th><th>State</th><th>Action</th><th>Risk</th><th>Change</th><th>Transaction</th></tr></thead>' +
                         '<tbody>' + rows + '</tbody>' +
                     '</table>' +
                 '</div>';

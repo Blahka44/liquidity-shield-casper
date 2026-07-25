@@ -46,7 +46,11 @@ class AuditLogger {
             reason: `Fetched CSPR price: $${marketData.currentPrice}, change: ${marketData.priceChange}%`,
             riskScore: null,
             state: null,
-            metadata: { source: marketData.source, timestamp: marketData.timestamp }
+            metadata: { 
+                source: marketData.source, 
+                timestamp: marketData.timestamp,
+                oracleHash: marketData.oracleHash
+            }
         });
     }
 
@@ -68,7 +72,12 @@ class AuditLogger {
             reason: policy.reason,
             riskScore: policy.riskScore,
             state: policy.state,
-            metadata: { policyId: policy.id, action: policy.action }
+            metadata: { 
+                policyId: policy.id, 
+                action: policy.action,
+                oracleHash: policy.oracleHash,
+                policyHash: policy.policyHash
+            }
         });
     }
 
@@ -81,7 +90,12 @@ class AuditLogger {
             state: policy.state,
             transactionHash: txHash,
             result: 'success',
-            metadata: { policyId: policy.id }
+            metadata: { 
+                policyId: policy.id,
+                oracleHash: policy.oracleHash,
+                policyHash: policy.policyHash,
+                explorerUrl: 'https://testnet.cspr.live/deploy/' + txHash
+            }
         });
     }
 
@@ -111,6 +125,10 @@ class AuditLogger {
 
     getRecentEvents(count = 10) {
         return this.events.slice(-count);
+    }
+
+    getTransactionByHash(txHash) {
+        return this.events.find(e => e.transactionHash === txHash) || null;
     }
 }
 

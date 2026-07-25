@@ -1,4 +1,6 @@
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const { CONFIG } = require('../types');
 
 class CasperExecutor {
@@ -6,7 +8,7 @@ class CasperExecutor {
         this.lastTxHash = null;
     }
 
-    deployTransaction(policy) {
+    sessionDeploy(policy) {
         const { riskScore, state, rawChange, oracleHash, policyHash } = policy;
         
         const script = `#!/bin/bash
@@ -89,6 +91,113 @@ casper-client put-transaction session \
     getLastTxHash() {
         return this.lastTxHash;
     }
+
+    deployTransaction(policy) {
+        const contractHash = process.env.LIQUIDITY_SHIELD_CONTRACT_HASH;
+        
+        if (!contractHash) {
+            console.log("⚠️ No stored contract hash found. Falling back to session deploy.");
+            return this.sessionDeploy(policy);
+        }
+
+        const riskScore = policy.riskScore || 0;
+        const state = policy.state || 'SAFE';
+        const oracleHash = policy.oracleHash || 'none';
+        const policyHash = policy.policyHash || 'none';
+        const timestamp = Date.now();
+
+        const script = `#!/bin/bash
+cd ${CONFIG.contractDir}
+casper-client put-deploy \\
+  --node-address https://node.testnet.casper.network \\
+  --chain-name casper-test \\
+  --secret-key ${CONFIG.secretKeyPath} \\
+  --payment-amount 10000000000 \\
+  --session-hash ${contractHash} \\
+  --session-entry-point "record_risk" \\
+  --session-arg "risk_score:u64='${riskScore}'" \\
+  --session-arg "status:string='${state}'" \\
+  --session-arg "oracle_hash:string='${oracleHash}'" \\
+  --session-arg "policy_hash:string='${policyHash}'" \\
+  --session-arg "timestamp:u64='${timestamp}'"
+`;
+
+        const deployScript = path.join(CONFIG.contractDir, 'deploy_risk.sh');
+        fs.writeFileSync(deployScript, script, { mode: 0o755 });
+
+        try {
+            const output = execSync(`bash ${deployScript}`, {
+                encoding: 'utf-8',
+                timeout: 120000,
+                cwd: CONFIG.contractDir
+            });
+
+            const deployHashMatch = output.match(/"deploy_hash"\s*:\s*"([a-f0-9]{64})"/i);
+            const deployHash = deployHashMatch ? deployHashMatch[1] : null;
+
+            if (deployHash) {
+                console.log(`✅ Risk recorded on stored contract: ${deployHash}`);
+                return { success: true, hash: deployHash, explorerUrl: "https://testnet.cspr.live/deploy/" + deployHash, deployHash, contractHash };
+            } else {
+                console.error("❌ No deploy hash found in output");
+                return { success: false };
+            }
+        } catch (error) {
+            console.error("❌ Stored contract call failed:", error.message);
+            return { success: false };
+        }
+    }
+
+
+
+    callVaultPause() {
+        const vaultHash = process.env.LIQUIDITY_SHIELD_VAULT_HASH;
+        if (!vaultHash) {
+            console.log("   ⚠️  No vault hash found. Skipping pause.");
+            return null;
+        }
+
+        const scriptLines = [
+            "#!/bin/bash",
+            "cd " + CONFIG.contractDir,
+            "casper-client put-deploy \\",
+            "  --node-address https://node.testnet.casper.network \\",
+            "  --chain-name casper-test \\",
+            "  --secret-key " + CONFIG.secretKeyPath + " \\",
+            "  --payment-amount 10000000000 \\",
+            "  --session-hash " + vaultHash + " \\",
+            "  --session-entry-point \"pause\""
+        ];
+        const script = scriptLines.join("\n");
+
+        const deployScript = path.join(CONFIG.contractDir, "deploy_pause.sh");
+        fs.writeFileSync(deployScript, script, { mode: 0o755 });
+
+        try {
+            const output = execSync("bash " + deployScript, {
+                encoding: "utf-8",
+                timeout: 120000,
+                cwd: CONFIG.contractDir
+            });
+
+            const deployHashMatch = output.match(/"deploy_hash"\s*:\s*"([a-f0-9]{64})"/i);
+            const deployHash = deployHashMatch ? deployHashMatch[1] : null;
+
+            if (deployHash) {
+                console.log("   🛡️  Vault PAUSED on-chain: " + deployHash);
+                return { success: true, hash: deployHash };
+            } else {
+                console.error("   ❌ Vault pause failed: no deploy hash");
+                return { success: false };
+            }
+        } catch (error) {
+            console.error("   ❌ Vault pause error:", error.message);
+            return { success: false };
+        }
+    }
+
+
+
 }
 
 module.exports = CasperExecutor;
