@@ -1,3 +1,15 @@
+## 🔗 Casper AI Toolkit Integration
+
+| Tool | Status | Usage |
+|---|---|---|
+| **CSPR.cloud** | ✅ Integrated |  — REST API for contract state queries |
+| **Odra Framework** | 🔄 Roadmap | Planned for v3 contract generation and AI-discoverable documentation |
+| **CSPR.click** | 🔄 Roadmap | Planned for mainnet wallet management and transaction signing |
+| **MCP Servers** | 🔄 Roadmap | Planned for multi-protocol agent queries and DeFi state access |
+| **x402** | 🔄 Roadmap | Planned for pay-per-request oracle API monetization |
+
+---
+
 ## 🎥 Live Demo
 [Watch the 90-second demo](https://www.loom.com/share/c3944f7ec8b5484db2457faa67274666)
 
