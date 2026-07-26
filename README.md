@@ -13,6 +13,93 @@
 ## 🎥 Live Demo
 [Watch the 90-second demo](https://www.loom.com/share/c3944f7ec8b5484db2457faa67274666)
 
+## 🎬 Demo Modes
+
+**Production mode** (══════════════════════════════════════════════════
+  LIQUIDITY SHIELD — FINALS DEMO
+  AI-Powered Risk Analysis (Groq LLM)
+══════════════════════════════════════════════════
+
+📡 PHASE 1: Normal Market Monitoring
+─────────────────────────────────────
+   Price: $0.00160022
+   24h Change: 4.25207%
+   Risk Score: 80/100 (SAFE)
+   💡 AI Reasoning: The 24-hour price change of 4.25% is relatively moderate, indicating a stable market condition for CSPR.
+   ✅ System stable. No action needed.
+
+📊 PHASE 6: Dashboard
+─────────────────────────────────────
+   Open: http://localhost:8000/dashboard.html
+   (Shows full audit trail with transaction hash)
+
+══════════════════════════════════════════════════
+  DEMO COMPLETE
+══════════════════════════════════════════════════):
+- Fetches live CSPR price data from CoinGecko API
+- Real Groq LLM 3.3 70B risk reasoning in natural language
+- Deploys to Casper testnet only when risk score ≥ WARNING (51+)
+- Vault pause triggered only on CRITICAL state (76+)
+
+**Demo mode** (══════════════════════════════════════════════════
+  LIQUIDITY SHIELD — FINALS DEMO
+  AI-Powered Risk Analysis (Groq LLM)
+══════════════════════════════════════════════════
+
+📡 PHASE 1: Normal Market Monitoring
+─────────────────────────────────────
+   Price: $0.00160022
+   24h Change: 4.25207%
+   Risk Score: 80/100 (SAFE)
+   💡 AI Reasoning: The 24-hour price change of 4.25% is relatively moderate, indicating a stable market condition for CSPR.
+   ✅ System stable. No action needed.
+
+📡 PHASE 2: Simulating Market Crash
+─────────────────────────────────────
+   Simulated Price: $0.00130418
+   Simulated Change: -18.50%
+   Risk Score: 85/100 (CRITICAL)
+   💡 AI Reasoning: The 24-hour price change of -18.50% indicates a significant decline in CSPR's value, suggesting high market volatility and potential liquidity risks.
+   🚨 CRITICAL STATE DETECTED
+
+📋 PHASE 3: Policy Generation
+─────────────────────────────────────
+   Action: Protection triggered
+   Oracle Hash: dfe5789259d52edbbb6d6b7a8347860e...
+   Policy Hash: 138a3025f13cad60c641d2c4bff16692...
+
+⛓️  PHASE 4: Deploying to Casper
+─────────────────────────────────────
+✅ Risk recorded on stored contract: bf50388ba7f57ef90d7a5b19298c4b16637ef50bcf21ce19a7388715125aed4d
+   ✅ Deployed successfully
+   Hash: bf50388ba7f57ef90d7a5b19298c4b16637ef50bcf21ce19a7388715125aed4d
+   Explorer: https://testnet.cspr.live/deploy/bf50388ba7f57ef90d7a5b19298c4b16637ef50bcf21ce19a7388715125aed4d
+
+🛡️  PHASE 4b: Pausing Vault
+─────────────────────────────────────
+   🛡️  Vault PAUSED on-chain: 5c8246e79a26850543223c00603207030e56a9ca42e9240f488dd59161a1ee3d
+   ✅ Vault PAUSED on-chain
+   Hash: 5c8246e79a26850543223c00603207030e56a9ca42e9240f488dd59161a1ee3d
+
+🔍 PHASE 5: On-Chain Verification
+─────────────────────────────────────
+   Run: node verify.js --tx bf50388ba7f57ef90d7a5b19298c4b16637ef50bcf21ce19a7388715125aed4d
+   (Verification runs independently)
+
+📊 PHASE 6: Dashboard
+─────────────────────────────────────
+   Open: http://localhost:8000/dashboard.html
+   (Shows full audit trail with transaction hash)
+
+══════════════════════════════════════════════════
+  DEMO COMPLETE
+══════════════════════════════════════════════════):
+- Identical pipeline, but injects a simulated -18.5% market crash
+- Guarantees CRITICAL state for deterministic video demonstration
+- Used for the 90-second demo video and judging walkthrough
+
+---
+
 ## 🔗 Live Contracts (Casper Testnet)
 
 | Contract | Hash | Entry Points |
