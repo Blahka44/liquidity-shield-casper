@@ -1,12 +1,25 @@
-## 🔗 Casper AI Toolkit Integration
+# Liquidity Shield
+
+> **Liquidity Shield is an autonomous AI risk agent for Casper DeFi. It monitors live markets, explains its decisions in natural language, records them immutably on-chain, and automatically pauses protected vaults during critical market conditions.**
+
+Traditional DeFi monitoring generates alerts that require human intervention. During rapid market events, delays of even a few minutes can lead to significant losses. Liquidity Shield demonstrates an alternative: an autonomous agent that reasons about risk, creates cryptographically verifiable decisions, and immediately executes protective actions on-chain — without human approval.
+
+## 🔗 Current Casper Integrations
 
 | Tool | Status | Usage |
 |---|---|---|
-| **CSPR.cloud** | ✅ Integrated |  — REST API for contract state queries |
-| **Odra Framework** | 🔄 Roadmap | Planned for v3 contract generation and AI-discoverable documentation |
-| **CSPR.click** | 🔄 Roadmap | Planned for mainnet wallet management and transaction signing |
-| **MCP Servers** | 🔄 Roadmap | Planned for multi-protocol agent queries and DeFi state access |
-| **x402** | 🔄 Roadmap | Planned for pay-per-request oracle API monetization |
+| **casper-js-sdk** | ✅ Active | On-chain state queries (CasperSDKClient.js) |
+| **Casper Client CLI** | ✅ Active | Autonomous transaction signing (casper-client put-deploy) |
+| **CSPR.cloud REST API** | ✅ Evaluated | Contract state queries; planned for v2 dashboard |
+
+## 🔄 Future Roadmap
+
+| Tool | Planned Use |
+|---|---|
+| **Odra Framework** | AI-discoverable contract generation for v3 |
+| **CSPR.click** | Browser wallet UX for dashboard v2 |
+| **MCP Servers** | Multi-protocol agent orchestration |
+| **x402 Micropayments** | Pay-per-request oracle monetization |
 
 ---
 
@@ -110,6 +123,10 @@
 ---
 
 # Liquidity Shield
+
+> **Liquidity Shield is an autonomous AI risk agent for Casper DeFi. It monitors live markets, explains its decisions in natural language, records them immutably on-chain, and automatically pauses protected vaults during critical market conditions.**
+
+Traditional DeFi monitoring generates alerts that require human intervention. During rapid market events, delays of even a few minutes can lead to significant losses. Liquidity Shield demonstrates an alternative: an autonomous agent that reasons about risk, creates cryptographically verifiable decisions, and immediately executes protective actions on-chain — without human approval.
 
 **Verifiable Autonomous Risk Management for Casper Network**
 
