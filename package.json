@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "casper-js-sdk": "^5.0.12",
-    "openai": "^6.49.0"
+    "openai": "^7.4.0"
   }
 }
